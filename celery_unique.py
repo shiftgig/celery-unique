@@ -148,7 +148,7 @@ class UniqueTaskMixin(object):
             if isinstance(task_options['expires'], datetime.datetime):
                 # Get the difference between the countdown and now (relative to the countdown's timezone)
                 seconds_until_expiry = int(
-                    (task_options['expires'] - datetime.datetime.now(task_options['expires'].tzinfo)).total_seconds()
+                    (task_options['expires'] - datetime.datetime.now(tz=task_options['expires'].tzinfo)).total_seconds()
                 )
             else:
                 seconds_until_expiry = task_options['expires']
