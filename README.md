@@ -41,7 +41,10 @@ based on the same arguments which are part of the task's signature.
     # connection as `unique_key` and `redis_client` keyword arguments,
     # respectively.
     
-    @celery_app.task(unique_key=lambda a, b, c=0: '{} with {}'.format(a, c), redis_client=my_redis_client)
+    @celery_app.task(
+        unique_key=lambda a, b, c=0: '{} with {}'.format(a, c), 
+        redis_client=my_redis_client
+    )
     def add_first_and_last(a, b, c=0):
         return a + c
     ```
@@ -55,7 +58,11 @@ based on the same arguments which are part of the task's signature.
     # via `apply_async()` with an ETA or countdown...
     async_result_1 = add_first_and_last.apply_async(args=(1, 2, 3), countdown=100)
     async_result_2 = add_first_and_last.apply_async(args=(3, 2, 1), countdown=100)
-    async_result_3 = add_first_and_last.apply_async(args=(1, 2), kwargs={'c': 3}, countdown=50)
+    async_result_3 = add_first_and_last.apply_async(
+        args=(1, 2), 
+        kwargs={'c': 3}, 
+        countdown=50
+    )
     
     # Wait 100 seconds for all tasks to complete
     time.sleep(100)
