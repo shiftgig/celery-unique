@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import datetime
 import inspect
+import pytz
 import unittest
 from uuid import uuid4
 
@@ -135,6 +136,17 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
 
 class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
     def test_ttl_is_difference_between_now_and_eta_if_eta_in_task_options_without_expiry(self):
+        test_current_datetime_now_value = datetime.datetime.now()
+        test_task_options = {'eta': test_current_datetime_now_value + datetime.timedelta(days=1)}
+        expected_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())
+        self.assertGreater(expected_ttl, 0)
+        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
+            mocked_datetime.datetime.now.return_value = test_current_datetime_now_value
+            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        self.assertEqual(actual_ttl, expected_ttl)
+
+    def test_ttl_is_difference_between_now_and_eta_if_eta_in_task_options_without_expiry_can_be_timezone_aware(self):
+        eastern_timezone = pytz.timezone('US/Eastern')
         test_current_datetime_now_value = datetime.datetime.now()
         test_task_options = {'eta': test_current_datetime_now_value + datetime.timedelta(days=1)}
         expected_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())

@@ -38,5 +38,5 @@ def make_frozen_datetime(freeze_point):
             '_now_constant': freeze_point
         }
     )
-    OverrideDatetime = type(b'datetime', (datetime.datetime,), {'now': classmethod(lambda cls: cls._now_constant)})
+    OverrideDatetime = type(b'datetime', (datetime.datetime,), {'now': classmethod(lambda cls, tz: cls._now_constant)})
     return MetaDatetime(b'datetime', (OverrideDatetime,), {})
