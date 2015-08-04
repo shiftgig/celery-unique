@@ -31,7 +31,6 @@ based on the same arguments which are part of the task's signature.
 
     ```python
     # my_application/celery_tasks.py
-    import time
     from . import celery_app
     from redis import Redis
     
@@ -52,6 +51,7 @@ based on the same arguments which are part of the task's signature.
 - Step 3: Run the tasks with a delay and see what happens
 
     ```python
+    import time
     from my_application.celery_tasks import add_first_and_last
     
     # Unique-handling will only take effect when the above functions are called
