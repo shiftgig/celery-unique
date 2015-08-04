@@ -137,13 +137,19 @@ class UniqueTaskMixin(object):
 
         option_keys = task_options.keys()
         if 'eta' in option_keys:
-            ttl_seconds = int((task_options['eta'] - datetime.datetime.now()).total_seconds())
+            # Get the difference between the ETA and now (relative to the ETA's timezone)
+            ttl_seconds = int(
+                (task_options['eta'] - datetime.datetime.now(tz=task_options['eta'].tzinfo)).total_seconds()
+            )
         elif 'countdown' in option_keys:
             ttl_seconds = task_options['countdown']
 
         if 'expires' in option_keys:
             if isinstance(task_options['expires'], datetime.datetime):
-                seconds_until_expiry = int((task_options['expires'] - datetime.datetime.now()).total_seconds())
+                # Get the difference between the countdown and now (relative to the countdown's timezone)
+                seconds_until_expiry = int(
+                    (task_options['expires'] - datetime.datetime.now(task_options['expires'].tzinfo)).total_seconds()
+                )
             else:
                 seconds_until_expiry = task_options['expires']
             if seconds_until_expiry < ttl_seconds:
