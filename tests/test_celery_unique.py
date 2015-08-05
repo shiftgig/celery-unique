@@ -91,10 +91,8 @@ class UniqueTaskMixinRevokeExtantUniqueTaskIfExistsTestCase(UniqueTaskMixinTestC
         self.test_instance.redis_client.set(self.test_unique_task_key, test_task_id)
         self.assertEqual(self.test_instance.redis_client.get(self.test_unique_task_key), test_task_id)
         self.test_instance._revoke_extant_unique_task_if_exists(self.test_unique_task_key)
-        self.assertTrue(self.mock_celery_app.AsyncResult.called)
-        self.assertEqual(self.mock_celery_app.AsyncResult.call_count, 1)
         self.assertIsNone(self.mock_celery_app.AsyncResult.assert_called_once_with(test_task_id))
-        self.assertTrue(self.mock_async_result.revoke.called)
+        self.assertIsNone(self.mock_async_result.revoke.assert_called_once_with())
 
     def test_deletes_from_redis_when_found_in_redis(self):
         test_task_id = str(uuid4())
@@ -128,7 +126,6 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
         test_ttl_seconds = 10
         with mock.patch.object(self.test_instance.redis_client, 'set') as mock_redis_client_set:
             self.test_instance._create_unique_task_record(self.test_unique_task_key, test_task_id, test_ttl_seconds)
-        self.assertTrue(mock_redis_client_set.called)
         self.assertIsNone(
             mock_redis_client_set.assert_called_once_with(self.test_unique_task_key, test_task_id, ex=test_ttl_seconds)
         )
@@ -285,7 +282,6 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
                 eta=datetime.datetime.now() + datetime.timedelta(days=1)
             )
         self.assertIsInstance(rs, AsyncResult)
-        self.assertTrue(mock_redis_client_get.called)
         self.assertIsNone(mock_redis_client_get.assert_called_once_with(self.test_unique_redis_key))
 
     def test_attempts_to_revoke_extant_task_when_countdown_is_given_with_no_eta(self):
@@ -300,7 +296,6 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
                 countdown=100
             )
         self.assertIsInstance(rs, AsyncResult)
-        self.assertTrue(mock_redis_client_get.called)
         self.assertIsNone(mock_redis_client_get.assert_called_once_with(self.test_unique_redis_key))
 
     def test_revokes_extant_task_when_one_exists(self):
