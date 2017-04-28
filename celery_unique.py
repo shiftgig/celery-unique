@@ -173,5 +173,4 @@ def unique_task_factory(task_cls):
     @return: The new Celery task base class with unique task-handling functionality mixed in.
     @rtype: type
     """
-    name = b'UniqueTask' if six.PY2 else 'UniqueTask'
-    return type(name, (UniqueTaskMixin, task_cls), {})
+    return type(str('UniqueTask'), (UniqueTaskMixin, task_cls), {})
