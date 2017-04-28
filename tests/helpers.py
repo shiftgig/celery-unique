@@ -8,5 +8,5 @@ from celery.result import AsyncResult
 
 
 class SimpleFakeTaskBase(object):
-    def apply_async(self, args=None, kwargs=None, task_id=None, producer=None, link=None, link_error=None, **options):
+    def apply_async(self, *args, **kwargs):
         return AsyncResult(str(uuid4()))
