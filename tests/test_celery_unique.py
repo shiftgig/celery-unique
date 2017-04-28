@@ -4,16 +4,14 @@ from __future__ import unicode_literals
 
 import datetime
 import inspect
-import pytz
 import unittest
 from uuid import uuid4
 
-from celery.result import AsyncResult
 import mock
+from celery.result import AsyncResult
 from mockredis import mock_redis_client
 
 import celery_unique
-
 from tests import helpers
 
 
