@@ -35,3 +35,27 @@ install:
 
 script:
   - tox
+
+before_deploy:
+  - pip install wheel
+  - python setup.py sdist bdist_wheel
+
+deploy:
+  - provider: pypi
+    user: hobarrera
+    password:
+      secure: Sdhdfwq5bd2P8Tvoh34VdEbR3vr4cU0jP2hIPEfmgu3kOLpzrngHhc448LhIpQtgrAghki/5qcQ+wktaA3iyv77cMtC2ms1tMILibflXzO1+zfRaCrZZ11WzUt+KmyDzMPS4MmNTivgf9VVP28Gcpm0QqYJ42bQ+TsOC3QfwD6EaDitO+7oafrCvNRnF+qwPUoJdTT+7IZAUmGlaK4xhrgd2tslKAPxd/GxrxXBPZgCk4fU623/K7xGvtPuK64o6SYBy1AKRoFxe/SPzWPxMrEdm7jZiHC76Ry+z4YA+2NkPburwhmP42tGJX5rxhelzi9F5JvMvqdYZ+/cT6o6qfMohR6fHVyE98nLzj3NInOq7i3sriFebHwfFBCvWz7Fx0KVTlTExMvNZ0TNEoFrXqdkerJImzu7uTdtFjWrwM/zx3g5Bd4P5jxQpYkCAGK5nBRxDKT+ok3dj8Jzv/F7ZmAF+mAB7puy7+ZyvhW0rt1KGtxh3K4ZJ2LlMvQX/koA4qkmGC+dkVkcd+q6qCi/z0kfEuthPZvk/feLOhnry2xd04Ptm6G7fVhinZHJKjEdldfIsdqNDXLMavtlOxM3EELG/bwROVyuffSuB11em9xBXvsjLcHkqtyoz2x/G/3IcSRWtkOlM0p+d7yVWEQZPrMuSeNQscjoHkL3ULbB9eBM=
+    on:
+      repo: sgrepo/celery-unique
+      tags: true
+    distributions: "sdist bdist_wheel"
+  - provider: releases
+    api_key:
+      secure: Gyq53t6UZLQPqWhPVahQ2uUQsDimYVB/E4SdnprnKRGrhVe0LF6XsXffiMi44kf0/LHf+O0dtJDZkPs+IFAH5/aS2Qa7IETANZJ8e5Sxrng1SvJoiJ9w06NUpqa9Y97RRHBmIHRrk4JExR8H+GUwTqjHDivrG/MGpKrXs2EdgRpUzgU5Wvurrs8jEALFXcJ7Nl0l+HYOxqxVH0P115mK0pCQtmdqhiEiXtt7LB21+LzS5SZxsIbW5IfYYK6cSnqu7K3p7H8/l8MyKf40ThAPEynnOosJw1OrTqcKeBSA12C5jRh0m5bdnGv9rvA9FqG9kfiAe/hOuV8wDDx1m+svI4ZuZp4MCIRyq6SBSwwABarInQgZrghO6SbBstbTX4xCcto5KVac3qt7CKnyFPPI7fg/UtTPFr3tcPCb/F5AIdM/aOn+AXGuIg6VLdX3g/ZJ712o7e9wY8OaaecWBZhxyTb/79BHIR0YrgwH/2N9wstFLiWZWOK+WQrqK6iyoYRIvjZ7iEFoV8JocaPp3XEtmL6vdSq+MV+suCMLnWZdcT4W66Ea0a9jm9HQ5cVAsbqHOmaHlsy1In7TfK/nDYjFCaI0P7eP23Z1VRIVfro3Z+Ce7MfGPw8a/wKBnLSkoq+GNohzEH78qyXqBJNUsbsvzpiENirIQQdNzniuiSVx6es=
+    file_glob: true
+    file: dist/*
+    skip_cleanup: true
+    on:
+      repo: sgrepo/celery-unique
+      tags: true
+    distributions: "sdist bdist_wheel"
