@@ -108,6 +108,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Object Brokering',
-        'Topic :: Software Development :: Distributed Computing'
+        'Topic :: System :: Distributed Computing',
     ]
 )
