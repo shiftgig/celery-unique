@@ -143,7 +143,6 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
         self.assertEqual(actual_ttl, expected_ttl)
 
     def test_ttl_is_difference_between_now_and_eta_if_eta_in_task_options_without_expiry_can_be_timezone_aware(self):
-        eastern_timezone = pytz.timezone('US/Eastern')
         test_current_datetime_now_value = datetime.datetime.now()
         test_task_options = {'eta': test_current_datetime_now_value + datetime.timedelta(days=1)}
         expected_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())
