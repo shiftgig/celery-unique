@@ -7,7 +7,11 @@ import inspect
 import unittest
 from uuid import uuid4
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 from celery.result import AsyncResult
 from freezegun import freeze_time
 from mockredis import mock_redis_client
