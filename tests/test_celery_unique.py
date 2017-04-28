@@ -9,6 +9,7 @@ from uuid import uuid4
 
 import mock
 from celery.result import AsyncResult
+from freezegun import freeze_time
 from mockredis import mock_redis_client
 
 import celery_unique
@@ -187,6 +188,7 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
         actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(expected_ttl, actual_ttl)
 
+    @freeze_time('2017-04-28')
     def test_datetime_expires_in_task_options_overrides_ttl_if_expiry_time_is_less_than_ttl(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_seconds_to_expiry = 50
@@ -199,11 +201,10 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
             test_task_options['countdown']
         )
         expected_ttl = test_seconds_to_expiry
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime = helpers.make_frozen_datetime(test_current_datetime_now_value)
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(expected_ttl, actual_ttl)
 
+    @freeze_time('2017-04-28')
     def test_datetime_expires_in_task_options_does_not_override_ttl_if_expiry_time_is_greater_than_ttl(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_seconds_to_expiry = 100
@@ -216,9 +217,7 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
             test_task_options['countdown']
         )
         expected_ttl = test_task_options['countdown']
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime = helpers.make_frozen_datetime(test_current_datetime_now_value)
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(expected_ttl, actual_ttl)
 
 
