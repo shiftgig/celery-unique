@@ -1,0 +1,37 @@
+sudo: false
+language: python
+cache: pip
+
+python:
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7-dev
+  - pypy3.3-5.2-alpha1
+
+env:
+  matrix:
+    - TOXENV=py
+
+matrix:
+  allow_failures:
+    - python: 3.7-dev
+  include:
+    - python: 3.6
+      env: TOXENV=flake8
+    - os: osx
+      language: generic
+      env: TOXENV=py
+      before_install:
+        - brew update
+        - brew install python3
+        - virtualenv env -p python3
+        - source env/bin/activate
+
+install:
+  - pip install tox
+
+script:
+  - tox
