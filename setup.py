@@ -99,6 +99,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Object Brokering',
-        'Topic :: Software Development :: Distributed Computing'
+        'Topic :: System :: Distributed Computing',
     ]
 )
