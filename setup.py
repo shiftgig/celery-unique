@@ -78,7 +78,6 @@ from setuptools import setup
 
 setup(
     name='celery-unique',
-    version='1.0.0',
     url='https://github.com/sgrepo/celery-unique',
     author='Tyler Hendrickson, Shiftgig Inc',
     author_email='tyler@shiftgig.com',
@@ -89,6 +88,10 @@ setup(
         'celery',
         'redis',
     ],
+    use_scm_version={
+        'version_scheme': 'post-release',
+    },
+    setup_requires=['setuptools_scm'],
     test_suite='tests',
     classifiers=[
         'Environment :: Web Environment',
