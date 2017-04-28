@@ -86,7 +86,7 @@ class UniqueTaskMixinRevokeExtantUniqueTaskIfExistsTestCase(UniqueTaskMixinTestC
         self.assertFalse(mock_redis_client_delete.called)
 
     def test_revokes_async_result_when_found_in_redis(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid4().hex.encode()
         self.test_instance.redis_client.set(self.test_unique_task_key, test_task_id)
         self.assertEqual(self.test_instance.redis_client.get(self.test_unique_task_key), test_task_id)
         self.test_instance._revoke_extant_unique_task_if_exists(self.test_unique_task_key)
@@ -94,7 +94,7 @@ class UniqueTaskMixinRevokeExtantUniqueTaskIfExistsTestCase(UniqueTaskMixinTestC
         self.assertIsNone(self.mock_async_result.revoke.assert_called_once_with())
 
     def test_deletes_from_redis_when_found_in_redis(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid4().hex.encode()
         self.test_instance.redis_client.set(self.test_unique_task_key, test_task_id)
         self.assertIsNotNone(self.test_instance.redis_client.get(self.test_unique_task_key))
         self.assertEqual(self.test_instance.redis_client.get(self.test_unique_task_key), test_task_id)
@@ -111,7 +111,7 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
         self.assertIsNone(self.test_instance.redis_client.get(self.test_unique_task_key))
 
     def test_redis_record_created(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid4().hex.encode()
         test_ttl_seconds = 10
         self.test_instance._create_unique_task_record(self.test_unique_task_key, test_task_id, test_ttl_seconds)
         redis_value = self.test_instance.redis_client.get(self.test_unique_task_key)
@@ -121,7 +121,7 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
         self.assertLessEqual(redis_record_ttl, test_ttl_seconds)
 
     def test_redis_set_method_called_with_expected_arguments(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid4().hex.encode()
         test_ttl_seconds = 10
         with mock.patch.object(self.test_instance.redis_client, 'set') as mock_redis_client_set:
             self.test_instance._create_unique_task_record(self.test_unique_task_key, test_task_id, test_ttl_seconds)
@@ -295,7 +295,7 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
         self.assertIsNone(mock_redis_client_get.assert_called_once_with(self.test_unique_redis_key))
 
     def test_revokes_extant_task_when_one_exists(self):
-        test_extant_tracked_task_id = str(uuid4())
+        test_extant_tracked_task_id = uuid4().hex.encode()
         self.assertIsNotNone(test_extant_tracked_task_id)
         self.redis_client.set(self.test_unique_redis_key, test_extant_tracked_task_id)
         self.assertEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
@@ -312,7 +312,7 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
         self.assertNotEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
 
     def test_creates_new_task_record_when_extant_task_exists(self):
-        test_extant_tracked_task_id = str(uuid4())
+        test_extant_tracked_task_id = uuid4().hex.encode()
         self.assertIsNotNone(test_extant_tracked_task_id)
         self.redis_client.set(self.test_unique_redis_key, test_extant_tracked_task_id)
         self.assertEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
@@ -327,7 +327,7 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
         )
         self.assertIsInstance(rs, AsyncResult)
         self.assertNotEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
-        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id)
+        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id.encode())
 
     def test_creates_new_task_record_when_no_extant_task_exists(self):
         self.assertIsNone(self.redis_client.get(self.test_unique_redis_key))
@@ -341,4 +341,4 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
             countdown=100
         )
         self.assertIsInstance(rs, AsyncResult)
-        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id)
+        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id.encode())
