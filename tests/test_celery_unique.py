@@ -4,16 +4,19 @@ from __future__ import unicode_literals
 
 import datetime
 import inspect
-import pytz
 import unittest
-from uuid import uuid4
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
+from celery import uuid
 from celery.result import AsyncResult
-import mock
+from freezegun import freeze_time
 from mockredis import mock_redis_client
 
 import celery_unique
-
 from tests import helpers
 
 
@@ -87,7 +90,7 @@ class UniqueTaskMixinRevokeExtantUniqueTaskIfExistsTestCase(UniqueTaskMixinTestC
         self.assertFalse(mock_redis_client_delete.called)
 
     def test_revokes_async_result_when_found_in_redis(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid().encode()
         self.test_instance.redis_client.set(self.test_unique_task_key, test_task_id)
         self.assertEqual(self.test_instance.redis_client.get(self.test_unique_task_key), test_task_id)
         self.test_instance._revoke_extant_unique_task_if_exists(self.test_unique_task_key)
@@ -95,7 +98,7 @@ class UniqueTaskMixinRevokeExtantUniqueTaskIfExistsTestCase(UniqueTaskMixinTestC
         self.assertIsNone(self.mock_async_result.revoke.assert_called_once_with())
 
     def test_deletes_from_redis_when_found_in_redis(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid().encode()
         self.test_instance.redis_client.set(self.test_unique_task_key, test_task_id)
         self.assertIsNotNone(self.test_instance.redis_client.get(self.test_unique_task_key))
         self.assertEqual(self.test_instance.redis_client.get(self.test_unique_task_key), test_task_id)
@@ -112,7 +115,7 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
         self.assertIsNone(self.test_instance.redis_client.get(self.test_unique_task_key))
 
     def test_redis_record_created(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid().encode()
         test_ttl_seconds = 10
         self.test_instance._create_unique_task_record(self.test_unique_task_key, test_task_id, test_ttl_seconds)
         redis_value = self.test_instance.redis_client.get(self.test_unique_task_key)
@@ -122,7 +125,7 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
         self.assertLessEqual(redis_record_ttl, test_ttl_seconds)
 
     def test_redis_set_method_called_with_expected_arguments(self):
-        test_task_id = str(uuid4())
+        test_task_id = uuid().encode()
         test_ttl_seconds = 10
         with mock.patch.object(self.test_instance.redis_client, 'set') as mock_redis_client_set:
             self.test_instance._create_unique_task_record(self.test_unique_task_key, test_task_id, test_ttl_seconds)
@@ -143,7 +146,6 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
         self.assertEqual(actual_ttl, expected_ttl)
 
     def test_ttl_is_difference_between_now_and_eta_if_eta_in_task_options_without_expiry_can_be_timezone_aware(self):
-        eastern_timezone = pytz.timezone('US/Eastern')
         test_current_datetime_now_value = datetime.datetime.now()
         test_task_options = {'eta': test_current_datetime_now_value + datetime.timedelta(days=1)}
         expected_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())
@@ -190,6 +192,7 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
         actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(expected_ttl, actual_ttl)
 
+    @freeze_time('2017-04-28')
     def test_datetime_expires_in_task_options_overrides_ttl_if_expiry_time_is_less_than_ttl(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_seconds_to_expiry = 50
@@ -202,11 +205,10 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
             test_task_options['countdown']
         )
         expected_ttl = test_seconds_to_expiry
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime = helpers.make_frozen_datetime(test_current_datetime_now_value)
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(expected_ttl, actual_ttl)
 
+    @freeze_time('2017-04-28')
     def test_datetime_expires_in_task_options_does_not_override_ttl_if_expiry_time_is_greater_than_ttl(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_seconds_to_expiry = 100
@@ -219,9 +221,7 @@ class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase)
             test_task_options['countdown']
         )
         expected_ttl = test_task_options['countdown']
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime = helpers.make_frozen_datetime(test_current_datetime_now_value)
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(expected_ttl, actual_ttl)
 
 
@@ -299,7 +299,7 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
         self.assertIsNone(mock_redis_client_get.assert_called_once_with(self.test_unique_redis_key))
 
     def test_revokes_extant_task_when_one_exists(self):
-        test_extant_tracked_task_id = str(uuid4())
+        test_extant_tracked_task_id = uuid().encode()
         self.assertIsNotNone(test_extant_tracked_task_id)
         self.redis_client.set(self.test_unique_redis_key, test_extant_tracked_task_id)
         self.assertEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
@@ -316,7 +316,7 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
         self.assertNotEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
 
     def test_creates_new_task_record_when_extant_task_exists(self):
-        test_extant_tracked_task_id = str(uuid4())
+        test_extant_tracked_task_id = uuid().encode()
         self.assertIsNotNone(test_extant_tracked_task_id)
         self.redis_client.set(self.test_unique_redis_key, test_extant_tracked_task_id)
         self.assertEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
@@ -331,7 +331,7 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
         )
         self.assertIsInstance(rs, AsyncResult)
         self.assertNotEqual(self.redis_client.get(self.test_unique_redis_key), test_extant_tracked_task_id)
-        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id)
+        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id.encode())
 
     def test_creates_new_task_record_when_no_extant_task_exists(self):
         self.assertIsNone(self.redis_client.get(self.test_unique_redis_key))
@@ -345,4 +345,4 @@ class UniqueTaskMixinApplyAsyncTestCase(UniqueTaskMixinTestCase):
             countdown=100
         )
         self.assertIsInstance(rs, AsyncResult)
-        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id)
+        self.assertEqual(self.redis_client.get(self.test_unique_redis_key), rs.task_id.encode())

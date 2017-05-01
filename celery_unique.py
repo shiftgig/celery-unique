@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 
 import datetime
 
+import six
+
 
 UNIQUE_REDIS_KEY_PREFIX = 'celery_unique'
 
@@ -171,4 +173,4 @@ def unique_task_factory(task_cls):
     @return: The new Celery task base class with unique task-handling functionality mixed in.
     @rtype: type
     """
-    return type(b'UniqueTask', (UniqueTaskMixin, task_cls), {})
+    return type(str('UniqueTask'), (UniqueTaskMixin, task_cls), {})
