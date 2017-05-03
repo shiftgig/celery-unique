@@ -1,0 +1,66 @@
+sudo: false
+language: python
+cache: pip
+
+addons:
+  apt:
+    packages:
+      - pandoc
+
+python:
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7-dev
+
+env:
+  matrix:
+    - TOXENV=py
+
+matrix:
+  allow_failures:
+    - python: 3.7-dev
+  include:
+    - python: 3.6
+      env: TOXENV=flake8
+    - os: osx
+      language: generic
+      env: TOXENV=py
+      before_install:
+        - brew update
+        - brew install python3 pandoc
+        - virtualenv env -p python3
+        - source env/bin/activate
+
+install:
+  - pip install tox
+
+script:
+  - tox
+
+before_deploy:
+  - pip install wheel
+  - pandoc --from=markdown --to=rst --output=README.rst README.md
+  - python setup.py sdist bdist_wheel
+
+deploy:
+  - provider: pypi
+    user: $PYPI_USERNAME
+    password: $PYPI_PASSWORD
+    on:
+      repo: sgrepo/celery-unique
+      tags: true
+    skip_cleanup: true
+    distributions: "sdist bdist_wheel"
+  - provider: releases
+    api_key:
+      secure: Gyq53t6UZLQPqWhPVahQ2uUQsDimYVB/E4SdnprnKRGrhVe0LF6XsXffiMi44kf0/LHf+O0dtJDZkPs+IFAH5/aS2Qa7IETANZJ8e5Sxrng1SvJoiJ9w06NUpqa9Y97RRHBmIHRrk4JExR8H+GUwTqjHDivrG/MGpKrXs2EdgRpUzgU5Wvurrs8jEALFXcJ7Nl0l+HYOxqxVH0P115mK0pCQtmdqhiEiXtt7LB21+LzS5SZxsIbW5IfYYK6cSnqu7K3p7H8/l8MyKf40ThAPEynnOosJw1OrTqcKeBSA12C5jRh0m5bdnGv9rvA9FqG9kfiAe/hOuV8wDDx1m+svI4ZuZp4MCIRyq6SBSwwABarInQgZrghO6SbBstbTX4xCcto5KVac3qt7CKnyFPPI7fg/UtTPFr3tcPCb/F5AIdM/aOn+AXGuIg6VLdX3g/ZJ712o7e9wY8OaaecWBZhxyTb/79BHIR0YrgwH/2N9wstFLiWZWOK+WQrqK6iyoYRIvjZ7iEFoV8JocaPp3XEtmL6vdSq+MV+suCMLnWZdcT4W66Ea0a9jm9HQ5cVAsbqHOmaHlsy1In7TfK/nDYjFCaI0P7eP23Z1VRIVfro3Z+Ce7MfGPw8a/wKBnLSkoq+GNohzEH78qyXqBJNUsbsvzpiENirIQQdNzniuiSVx6es=
+    file_glob: true
+    file: dist/*
+    skip_cleanup: true
+    on:
+      repo: sgrepo/celery-unique
+      tags: true
+    distributions: "sdist bdist_wheel"
