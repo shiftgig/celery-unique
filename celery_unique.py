@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 
 import datetime
 
-import six
-
 
 UNIQUE_REDIS_KEY_PREFIX = 'celery_unique'
 

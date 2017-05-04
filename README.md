@@ -85,7 +85,15 @@ this scenario and a user made visits on Monday, Tuesday, and Wednesday, then the
 30 days after Monday, 30 days after Tuesday, and 30 days after Wednesday.  With celery-unique (and a 
 proper task configuration, of course), the only email sent would be 30 days after Wednesday.  Huzzah!
 
-# Licence
+Hacking
+-------
+
+Versions are handled by `setuptools-scm`. To release a new version, tag the
+relevant commit, and the push it to GitHub. Travis will push the package to
+PyPI automatically.
+
+Licence
+-------
 
 Copyright 2015-2017, Shiftgig Inc
 
