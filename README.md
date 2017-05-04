@@ -84,3 +84,19 @@ ETA of 30 days from the current time each time they visited.  If we didn't have 
 this scenario and a user made visits on Monday, Tuesday, and Wednesday, then they would get an email 
 30 days after Monday, 30 days after Tuesday, and 30 days after Wednesday.  With celery-unique (and a 
 proper task configuration, of course), the only email sent would be 30 days after Wednesday.  Huzzah!
+
+# Licence
+
+Copyright 2015-2017, Shiftgig Inc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
