@@ -1,4 +1,10 @@
 # celery-unique
+
+![Travis CI build status](https://img.shields.io/travis/sgrepo/celery-unique.svg)
+![Codecov coverage report](https://img.shields.io/codecov/c/github/sgrepo/celery-unique.svg)
+![Latest PyPI release](https://img.shields.io/pypi/v/celery-unique.svg)
+![License](https://img.shields.io/pypi/l/celery-unique.svg)
+
 Adds argument-based unique constraints to Celery tasks
 
 ## Overview
