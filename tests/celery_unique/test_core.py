@@ -55,7 +55,7 @@ class UniqueTaskMixinTestCase(CeleryUniqueTestCase):
 
 class UniqueTaskMixinMakeRedisKeyTestCase(UniqueTaskMixinTestCase):
     def test_with_static_unique_key_lambda(self):
-        self.assertEqual(celery_unique.UNIQUE_REDIS_KEY_PREFIX, 'celery_unique')
+        self.assertEqual(celery_unique.core.UNIQUE_REDIS_KEY_PREFIX, 'celery_unique')
         test_instance = self.test_cls()
         test_instance.unique_key = lambda *args, **kwargs: 'A_UNIQUE_KEY'
         redis_key = test_instance._make_redis_key((), {})
@@ -135,35 +135,33 @@ class UniqueTaskMixinCreateUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
 
 
 class UniqueTaskMixinMakeTTLForUniqueTaskRecordTestCase(UniqueTaskMixinTestCase):
+
+    @freeze_time('2017-05-05')
     def test_ttl_is_difference_between_now_and_eta_if_eta_in_task_options_without_expiry(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_task_options = {'eta': test_current_datetime_now_value + datetime.timedelta(days=1)}
         expected_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())
         self.assertGreater(expected_ttl, 0)
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime.now.return_value = test_current_datetime_now_value
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(actual_ttl, expected_ttl)
 
+    @freeze_time('2017-05-05')
     def test_ttl_is_difference_between_now_and_eta_if_eta_in_task_options_without_expiry_can_be_timezone_aware(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_task_options = {'eta': test_current_datetime_now_value + datetime.timedelta(days=1)}
         expected_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())
         self.assertGreater(expected_ttl, 0)
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime.now.return_value = test_current_datetime_now_value
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(actual_ttl, expected_ttl)
 
+    @freeze_time('2017-05-05')
     def test_ttl_defaults_to_1_if_eta_before_now_in_task_options_without_expiry(self):
         test_current_datetime_now_value = datetime.datetime.now()
         test_task_options = {'eta': test_current_datetime_now_value - datetime.timedelta(days=1)}
         expected_default_ttl = 1
         would_be_ttl = int((test_task_options['eta'] - test_current_datetime_now_value).total_seconds())
         self.assertLessEqual(would_be_ttl, 0)
-        with mock.patch.object(celery_unique, 'datetime', mock.Mock(wraps=datetime)) as mocked_datetime:
-            mocked_datetime.datetime.now.return_value = test_current_datetime_now_value
-            actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
+        actual_ttl = celery_unique.UniqueTaskMixin._make_ttl_for_unique_task_record(test_task_options)
         self.assertEqual(actual_ttl, expected_default_ttl)
 
     def test_ttl_is_countdown_if_countdown_in_task_options_without_expiry(self):
