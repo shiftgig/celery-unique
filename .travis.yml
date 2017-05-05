@@ -35,10 +35,13 @@ matrix:
         - source env/bin/activate
 
 install:
-  - pip install tox
+  - pip install tox codecov
 
 script:
   - tox
+
+after_script:
+  - codecov
 
 before_deploy:
   - pip install wheel
