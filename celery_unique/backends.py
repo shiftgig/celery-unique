@@ -6,7 +6,7 @@ class BaseBackend:
     implement.
     """
 
-    def create_task_record(self, key, task_id, ttl):
+    def create_task_record(self, key, task_id, ttl):  # pragma: no cover
         """
         Creates a new record for the recently-published unique task.
 
@@ -19,13 +19,13 @@ class BaseBackend:
         """
         raise NotImplementedError()
 
-    def get_task_id(self, key):
+    def get_task_id(self, key):  # pragma: no cover
         """
         Returns the task_id for an exiting task
         """
         raise NotImplementedError()
 
-    def revoke_extant_task(self, key):
+    def revoke_extant_task(self, key):  # pragma: no cover
         """
         Deletes a task for a given key.
 
